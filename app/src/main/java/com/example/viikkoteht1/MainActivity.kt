@@ -35,6 +35,7 @@ import com.example.viikkoteht1.domain.sortByDueDate
 import com.example.viikkoteht1.domain.toggleDone
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import com.example.viikkoteht1.Homescreen
 
 
 class MainActivity : ComponentActivity() {
@@ -69,7 +70,7 @@ class MainActivity : ComponentActivity() {
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Column(modifier) {
         Text(text = "Hello $name!")
-        ParentComponent()
+        Homescreen()
     }
 }
 @Composable
@@ -82,115 +83,4 @@ fun NameTextField(
         onValueChange = onNameChange,
         label = { Text("Nimi") }
     )
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun ParentComponent() {
-    var allTasks by remember { mutableStateOf(mockTasks) }
-    var shownTasks by remember { mutableStateOf(mockTasks) }
-
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var priorityText by remember { mutableStateOf("") }
-    var dueDate by remember { mutableStateOf("") }
-
-    Column {
-        Text("Home")
-
-        Spacer(Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = title,
-            onValueChange = { title = it },
-            label = { Text("Title") }
-        )
-        OutlinedTextField(
-            value = description,
-            onValueChange = { description = it },
-            label = { Text("Description") }
-        )
-        OutlinedTextField(
-            value = priorityText,
-            onValueChange = { priorityText = it },
-            label = { Text("Priority") }
-        )
-        OutlinedTextField(
-            value = dueDate,
-            onValueChange = { dueDate = it },
-            label = { Text("Due date (yyyy-dd-MM)") }
-        )
-
-        Spacer(Modifier.height(12.dp))
-
-        Row {
-            Button(
-                onClick = {
-                    val newTask = Task(
-                        id = allTasks.size + 1,
-                        title = if (title.isBlank()) "Untitled" else title,
-                        description = if (description.isBlank()) "-" else description,
-                        priority = priorityText.toIntOrNull() ?: 1,
-                        dueDate = if (dueDate.isBlank()) "1970-01-01" else dueDate,
-                        done = false
-                    )
-                    allTasks = addTask(allTasks, newTask)
-                    shownTasks = allTasks
-
-                    // clear input fields
-                    title = ""
-                    description = ""
-                    priorityText = ""
-                    dueDate = ""
-                }
-            ) { Text("addTask") }
-
-            Spacer(Modifier.width(8.dp))
-
-            Button(
-                onClick = {
-                    allTasks = sortByDueDate(allTasks)
-                    shownTasks = allTasks
-                }
-            ) { Text("sortByDueDate") }
-        }
-
-        Spacer(Modifier.height(8.dp))
-
-        Row {
-            Button(onClick = { shownTasks = allTasks }) { Text("Show All") }
-            Spacer(Modifier.width(8.dp))
-            Button(onClick = { shownTasks = filterByDone(allTasks, true) }) { Text("Show Done") }
-            Spacer(Modifier.width(8.dp))
-            Button(onClick = { shownTasks = filterByDone(allTasks, false) }) { Text("Show Not done") }
-        }
-
-        Spacer(Modifier.height(12.dp))
-
-        val scrollState = rememberScrollState()
-
-        Column(
-            modifier = Modifier
-                .verticalScroll(scrollState)
-                .weight(1f)
-        ) {
-            shownTasks.forEach { task ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                ) {
-                    Text("${task.id}. ${task.title} (${task.dueDate}) done=${task.done}")
-                    Spacer(Modifier.width(8.dp))
-                    Button(onClick = {
-                        allTasks = toggleDone(allTasks, task.id)
-                        shownTasks = allTasks
-                    }) {
-                        Text("toggle done")
-                    }
-                }
-            }
-        }
-    }
 }
