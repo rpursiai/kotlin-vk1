@@ -1,4 +1,4 @@
-package com.example.viikkoteht1.domain
+package com.example.viikkoteht1.model
 
 fun addTask(list: List<Task>, newTask: Task): List<Task> {
     return list + newTask
