@@ -6,60 +6,28 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.viikkoteht1.model.Task
 import com.example.viikkoteht1.viewmodel.TaskViewModel
 
 @Composable
-fun HomeScreen(vm: TaskViewModel = viewModel()) {
+fun HomeScreen(vm: TaskViewModel) {
 
     val tasks by vm.tasks.collectAsState()
 
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var priorityText by remember { mutableStateOf("") }
-    var dueDate by remember { mutableStateOf("") }
-
     var selectedTask by remember { mutableStateOf<Task?>(null) }
-
-
+    var showAddDialog by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Home")
 
         Spacer(Modifier.height(12.dp))
 
-        OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Title") })
-        OutlinedTextField(value = description, onValueChange = { description = it }, label = { Text("Description") })
-        OutlinedTextField(value = priorityText, onValueChange = { priorityText = it }, label = { Text("Priority") })
-        OutlinedTextField(value = dueDate, onValueChange = { dueDate = it }, label = { Text("Due date") })
-
-        Spacer(Modifier.height(12.dp))
-
-        Button(onClick = {
-            val newId = (tasks.maxOfOrNull { it.id } ?: 0) + 1
-            vm.addTask(
-                Task(
-                    id = newId,
-                    title = if (title.isBlank()) "Untitled" else title,
-                    description = if (description.isBlank()) "-" else description,
-                    priority = priorityText.toIntOrNull() ?: 1,
-                    dueDate = if (dueDate.isBlank()) "01-01-1970" else dueDate,
-                    done = false
-                )
-            )
-
-            title = ""
-            description = ""
-            priorityText = ""
-            dueDate = ""
-        }) {
-            Text("addTask")
+        Button(onClick = { showAddDialog = true }) {
+            Text("Add")
         }
 
         Spacer(Modifier.height(12.dp))
@@ -85,6 +53,25 @@ fun HomeScreen(vm: TaskViewModel = viewModel()) {
                 }
             }
         }
+    }
+
+    if (showAddDialog) {
+        AddTaskDialog(
+            onDismiss = { showAddDialog = false },
+            onSave = { title, description, priorityText, dueDate ->
+                val newId = (tasks.maxOfOrNull { it.id } ?: 0) + 1
+                vm.addTask(
+                    Task(
+                        id = newId,
+                        title = if (title.isBlank()) "Untitled" else title,
+                        description = if (description.isBlank()) "-" else description,
+                        priority = priorityText.toIntOrNull() ?: 1,
+                        dueDate = if (dueDate.isBlank()) "01-01-1970" else dueDate,
+                        done = false
+                    )
+                )
+            }
+        )
     }
 
     selectedTask?.let { task ->
